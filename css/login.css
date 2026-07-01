@@ -1,0 +1,33 @@
+/* Inicio de sesión */
+
+.pagina-login {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background:
+    linear-gradient(rgba(255,248,245,0.85), rgba(255,248,245,0.85)),
+    url('../img/inicio-bg.jpg') center / cover no-repeat fixed;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 64px 40px;
+  border: 1px solid var(--outline-variant);
+  box-shadow: 0 8px 40px rgba(75, 54, 33, 0.1);
+}
+
+.login-icono {
+  text-align: center;
+  margin-bottom: 64px;
+}
+
+.login-logo { width: 240px; }
+
+.campo-grupo { margin-bottom: 24px; }
+
+@media (max-width: 480px) {
+  .login-card { padding: 40px 24px; }
+}
