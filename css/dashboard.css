@@ -1,0 +1,9 @@
+/* Ajustes propios del panel principal. */
+
+.dashboard-grid {
+  align-items: start;
+}
+
+.acciones-rapidas {
+  margin-top: 4px;
+}
