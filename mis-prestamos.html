@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiblioTrack — Mis Préstamos</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/mis-prestamos.css">
+  </head>
+  <body>
+    <aside class="sidebar" id="menu-principal">
+      <div class="sidebar-logo"><img src="img/logo-blanco.png" alt="BiblioTrack"></div>
+      <nav class="sidebar-nav">
+        <a href="lector.html"><i class="bi bi-grid-1x2"></i> Panel del Lector</a>
+        <a href="explorar.html"><i class="bi bi-book"></i> Explorar Libros</a>
+        <a href="mis-prestamos.html" class="activo"><i class="bi bi-journal-text"></i> Mis Préstamos</a>
+        <a href="perfil.html"><i class="bi bi-person"></i> Mi Perfil</a>
+      </nav>
+      <div class="sidebar-usuario">
+        <div class="avatar-sm">DJ</div>
+        <div class="detalle">Derek Jensen<span>Socio #4021</span></div>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay"></div>
+
+    <header class="topbar">
+      <button class="btn-menu-hamburguesa" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal"><i class="bi bi-list"></i></button>
+      <span class="topbar-titulo">Mis Préstamos</span>
+      <div class="topbar-busqueda"><i class="bi bi-search"></i><input type="search" placeholder="Buscar en mis préstamos..."></div>
+      <div class="topbar-acciones">
+        <div class="topbar-usuario" tabindex="0">
+          <div class="info-usuario"><strong>Derek Jensen</strong><span>Lector</span></div>
+          <div class="avatar">DJ</div><div class="menu-usuario"><a href="perfil.html"><i class="bi bi-person"></i> Ver perfil</a><a href="login.html"><i class="bi bi-arrow-return-left"></i> Cerrar sesión</a></div>
+        </div>
+      </div>
+    </header>
+    <main class="contenido-principal">
+      <div class="pagina-encabezado">
+        <div><h1>Mis Préstamos</h1><p>Tus préstamos activos y el historial completo de movimientos.</p></div>
+      </div>
+      <div class="tabs-lector" role="tablist">
+        <button class="tab-lector activo" id="tab-activos" data-tab="activos" role="tab" aria-selected="true">Activos</button>
+        <button class="tab-lector" id="tab-historial" data-tab="historial" role="tab" aria-selected="false">Historial</button>
+      </div>
+
+      <div class="tabla-contenedor" id="panel-activos" role="tabpanel">
+        <div class="tabla-scroll">
+          <table class="tabla">
+            <thead><tr><th>Libro</th><th>Fecha Préstamo</th><th>Vencimiento</th><th>Estado</th></tr></thead>
+            <tbody id="tabla-mis-prestamos"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tabla-contenedor oculto" id="panel-historial" role="tabpanel">
+        <div class="tabla-scroll">
+          <table class="tabla">
+            <thead><tr><th>Libro</th><th>Fecha Préstamo</th><th>Fecha Devolución</th><th>Estado</th></tr></thead>
+            <tbody id="tabla-historial"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+    <footer class="footer"><span>&copy; 2026 BiblioTrack. Todos los derechos reservados.</span></footer>
+    <script src="js/menu.js"></script>
+    <script src="js/mis-prestamos.js"></script>
+  </body>
+</html>

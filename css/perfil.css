@@ -1,0 +1,9 @@
+/* Ajustes propios del perfil. */
+
+#perfil-contenido {
+  max-width: 760px;
+}
+
+.perfil-acciones {
+  flex-wrap: wrap;
+}

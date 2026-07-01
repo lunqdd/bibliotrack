@@ -1,0 +1,38 @@
+/* Ajustes propios del panel del lector. */
+
+.lector-grid {
+  align-items: start;
+}
+
+#recomendados {
+  margin-top: 4px;
+}
+
+.mensaje-lector {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .lector-grid,
+  .lector-grid > .card {
+    min-width: 0;
+  }
+
+  .lector-grid .tabla-scroll {
+    max-width: 100%;
+  }
+
+  .recomendado-item {
+    gap: 12px;
+  }
+
+  .recomendado-info {
+    min-width: 0;
+  }
+
+  .recomendado-info h4,
+  .recomendado-info p {
+    word-break: break-word;
+  }
+}
