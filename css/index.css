@@ -1,0 +1,101 @@
+/* Portada de BiblioTrack */
+
+.portada {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background:
+    linear-gradient(rgba(255,248,245,0.9), rgba(255,248,245,0.92)),
+    url('../img/inicio-bg.jpg') center / cover no-repeat fixed;
+}
+
+.portada-contenido {
+  width: 100%;
+  max-width: 1040px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+  gap: 40px;
+  align-items: center;
+}
+
+.portada-logo {
+  width: 220px;
+  margin-bottom: 40px;
+}
+
+.portada h1 {
+  max-width: 620px;
+  font-size: 52px;
+  line-height: 60px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.portada p {
+  max-width: 560px;
+  font-size: 18px;
+  line-height: 28px;
+  color: var(--on-surface-variant);
+  margin-bottom: 32px;
+}
+
+.portada-acciones {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.portada-link {
+  font-weight: 700;
+  padding: 12px;
+}
+
+.portada-panel {
+  background-color: var(--surface-lowest);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radio-xl);
+  box-shadow: var(--sombra);
+  padding: 24px;
+}
+
+.portada-dato {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--outline-variant);
+}
+
+.portada-dato:last-child { border-bottom: none; }
+
+.portada-dato span {
+  color: var(--on-surface-variant);
+  font-weight: 600;
+}
+
+.portada-dato strong {
+  font-family: var(--fuente-titular);
+  font-size: 32px;
+  line-height: 36px;
+  color: var(--primary);
+}
+
+@media (max-width: 800px) {
+  .portada-contenido {
+    grid-template-columns: 1fr;
+  }
+
+  .portada h1 {
+    font-size: 38px;
+    line-height: 46px;
+  }
+}
+
+@media (max-width: 480px) {
+  .portada { padding: 24px 16px; }
+  .portada-logo { width: 180px; margin-bottom: 28px; }
+  .portada-acciones .btn { width: 100%; }
+}
