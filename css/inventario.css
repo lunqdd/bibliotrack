@@ -1,0 +1,10 @@
+/* Ajustes propios de inventario. */
+
+#buscar-inventario {
+  min-width: 240px;
+}
+
+#tabla-inventario .isbn-texto {
+  display: inline-block;
+  margin-top: 2px;
+}
