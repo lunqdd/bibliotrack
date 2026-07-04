@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiblioTrack — Gestión de Libros</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/libros.css">
+  </head>
+  <body>
+
+    <aside class="sidebar" id="menu-principal">
+      <div class="sidebar-logo"><img src="img/logo-blanco.png" alt="BiblioTrack"></div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html"><i class="bi bi-grid-1x2"></i> Panel Principal</a>
+        <a href="libros.html" class="activo"><i class="bi bi-book"></i> Gestión de Libros</a>
+        <a href="usuarios.html"><i class="bi bi-people"></i> Gestión de Usuarios</a>
+        <a href="prestamos.html"><i class="bi bi-arrow-left-right"></i> Préstamos y Devoluciones</a>
+        <a href="inventario.html"><i class="bi bi-box-seam"></i> Inventario</a>
+        <a href="reportes.html"><i class="bi bi-bar-chart-line"></i> Reportes y Estadísticas</a>
+        <a href="perfil-admin.html"><i class="bi bi-person"></i> Mi Perfil</a>
+      </nav>
+      <div class="sidebar-usuario">
+        <div class="avatar-sm">LD</div>
+        <div class="detalle">
+          Luna Delgado
+          <span>Administradora</span>
+        </div>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay"></div>
+
+    <header class="topbar">
+      <button class="btn-menu-hamburguesa" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal"><i class="bi bi-list"></i></button>
+      <span class="topbar-titulo">Sistema de Administración</span>
+      <div class="topbar-busqueda"><i class="bi bi-search"></i><input type="search" placeholder="Buscar libro..."></div>
+      <div class="topbar-acciones">
+        <div class="topbar-usuario" tabindex="0">
+          <div class="info-usuario"><strong>Luna Delgado</strong><span>Administradora</span></div>
+          <div class="avatar">LD</div><div class="menu-usuario"><a href="perfil-admin.html"><i class="bi bi-person"></i> Ver perfil</a><a href="login.html"><i class="bi bi-arrow-return-left"></i> Cerrar sesión</a></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="contenido-principal">
+      <div class="pagina-encabezado">
+        <div>
+          <h1>Gestión de Libros</h1>
+          <p>Administra el catálogo completo, existencias y disponibilidad de la biblioteca.</p>
+        </div>
+        <div class="pagina-acciones">
+          <button class="btn btn-primario"><i class="bi bi-plus-lg"></i> Registrar Nuevo Libro</button>
+        </div>
+      </div>
+
+      <div class="fila-stats" id="stats-libros"></div>
+
+      <div class="tabla-contenedor">
+        <div class="tabla-filtros">
+          <input type="search" id="buscar-libro" placeholder="Buscar por título, autor o ISBN...">
+          <select id="filtro-genero"><option value="">Género</option></select>
+          <select id="filtro-editorial"><option value="">Editorial</option></select>
+          <select id="filtro-estado"><option value="">Disponibilidad</option></select>
+        </div>
+        <div class="tabla-scroll"><table class="tabla">
+          <thead><tr><th>Portada</th><th>Libro</th><th>ISBN</th><th>Categoría</th><th>Disponibilidad</th><th>Acciones</th></tr></thead>
+          <tbody id="tabla-libros"></tbody>
+        </table></div>
+        <div class="paginacion-contenedor">
+          <span id="info-paginacion-libros"></span>
+          <div class="paginacion" id="paginacion-libros"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modal Registrar/Editar Libro -->
+    <div class="modal-overlay" id="modal-libro">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="modal-libro-titulo">Registrar Nuevo Libro</h2>
+          <button class="modal-cerrar" data-cerrar-modal="modal-libro"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal-body">
+          <form id="form-libro" novalidate>
+            <div class="form-fila">
+              <div class="form-grupo">
+                <label for="libro-titulo">Título</label>
+                <input type="text" id="libro-titulo" placeholder="Título del libro">
+              </div>
+              <div class="form-grupo">
+                <label for="libro-autor">Autor</label>
+                <input type="text" id="libro-autor" placeholder="Nombre del autor">
+              </div>
+            </div>
+            <div class="form-fila">
+              <div class="form-grupo">
+                <label for="libro-isbn">ISBN</label>
+                <input type="text" id="libro-isbn" placeholder="978-0000000000">
+              </div>
+              <div class="form-grupo">
+                <label for="libro-editorial">Editorial</label>
+                <select id="libro-editorial">
+                  <option value="">Seleccionar editorial</option>
+                  <option>Sudamericana</option>
+                  <option>Bantam Books</option>
+                  <option>Plaza &amp; Janés</option>
+                  <option>Penguin</option>
+                  <option>Reynal &amp; Hitchcock</option>
+                  <option>Random House</option>
+                  <option>Francisco de Robles</option>
+                  <option>Debate</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-fila">
+              <div class="form-grupo">
+                <label for="libro-genero">Género</label>
+                <select id="libro-genero">
+                  <option value="">Seleccionar género</option>
+                  <option>Novela</option>
+                  <option>Ciencia</option>
+                  <option>Historia</option>
+                  <option>Arte</option>
+                  <option>Filosofía</option>
+                </select>
+              </div>
+              <div class="form-grupo">
+                <label for="libro-anio">Año de Publicación</label>
+                <input type="number" id="libro-anio" placeholder="2026">
+              </div>
+            </div>
+            <div class="form-grupo">
+              <label for="libro-portada">URL de Portada</label>
+              <input type="url" id="libro-portada" placeholder="https://ejemplo.com/portada.jpg">
+            </div>
+            <div class="form-grupo" id="grupo-ejemplares-iniciales">
+              <label for="libro-ejemplares">Ejemplares Iniciales</label>
+              <input type="number" id="libro-ejemplares" placeholder="1" min="1">
+              <p class="form-nota">Crea esta cantidad de copias físicas. Para agregar o dar de baja copias de un libro ya registrado, usa Inventario.</p>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" data-cerrar-modal="modal-libro">Cancelar</button>
+          <button class="btn btn-primario" id="btn-guardar-libro">Guardar Libro</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Detalle Libro -->
+    <div class="modal-overlay" id="modal-detalle-libro">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Detalle del Libro</h2>
+          <button class="modal-cerrar" data-cerrar-modal="modal-detalle-libro"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal-body" id="detalle-libro-contenido"></div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" data-cerrar-modal="modal-detalle-libro">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-eliminar-libro">
+      <div class="modal modal-confirmacion">
+        <div class="modal-header">
+          <h2>Eliminar Libro</h2>
+          <button class="modal-cerrar" data-cerrar-modal="modal-eliminar-libro"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal-body">
+          <p id="texto-eliminar-libro">Confirma si deseas eliminar este libro del catálogo.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" data-cerrar-modal="modal-eliminar-libro">Cancelar</button>
+          <button class="btn btn-primario" id="btn-confirmar-eliminar-libro">Eliminar</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <span>&copy; 2026 BiblioTrack. Todos los derechos reservados.</span>
+    </footer>
+
+    <script src="js/menu.js"></script>
+    <script src="js/libros.js"></script>
+  </body>
+</html>

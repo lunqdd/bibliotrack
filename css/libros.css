@@ -1,0 +1,9 @@
+/* Ajustes propios de gestion de libros. */
+
+#buscar-libro {
+  min-width: 260px;
+}
+
+.portada-libro {
+  font-weight: 700;
+}
