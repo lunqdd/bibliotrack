@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiblioTrack — Préstamos y Devoluciones</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/prestamos.css">
+  </head>
+  <body>
+
+    <aside class="sidebar" id="menu-principal">
+      <div class="sidebar-logo"><img src="img/logo-blanco.png" alt="BiblioTrack"></div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html"><i class="bi bi-grid-1x2"></i> Panel Principal</a>
+        <a href="libros.html"><i class="bi bi-book"></i> Gestión de Libros</a>
+        <a href="usuarios.html"><i class="bi bi-people"></i> Gestión de Usuarios</a>
+        <a href="prestamos.html" class="activo"><i class="bi bi-arrow-left-right"></i> Préstamos y Devoluciones</a>
+        <a href="inventario.html"><i class="bi bi-box-seam"></i> Inventario</a>
+        <a href="reportes.html"><i class="bi bi-bar-chart-line"></i> Reportes y Estadísticas</a>
+        <a href="perfil-admin.html"><i class="bi bi-person"></i> Mi Perfil</a>
+      </nav>
+      <div class="sidebar-usuario">
+        <div class="avatar-sm">LD</div>
+        <div class="detalle">
+          Luna Delgado
+          <span>Administradora</span>
+        </div>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay"></div>
+
+    <header class="topbar">
+      <button class="btn-menu-hamburguesa" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal"><i class="bi bi-list"></i></button>
+      <span class="topbar-titulo">Sistema de Administración</span>
+      <div class="topbar-busqueda"><i class="bi bi-search"></i><input type="search" placeholder="Buscar préstamos, usuarios o títulos..."></div>
+      <div class="topbar-acciones">
+        <div class="topbar-usuario" tabindex="0">
+          <div class="info-usuario"><strong>Luna Delgado</strong><span>Administradora</span></div>
+          <div class="avatar">LD</div><div class="menu-usuario"><a href="perfil-admin.html"><i class="bi bi-person"></i> Ver perfil</a><a href="login.html"><i class="bi bi-arrow-return-left"></i> Cerrar sesión</a></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="contenido-principal">
+      <div class="pagina-encabezado">
+        <div>
+          <h1>Préstamos y Devoluciones</h1>
+          <p>Registra préstamos, devoluciones y revisa el historial de ejemplares.</p>
+        </div>
+        <div class="pagina-acciones">
+          <button class="btn btn-outline" id="btn-abrir-devolucion"><i class="bi bi-arrow-return-left"></i> Registrar Devolución</button>
+          <button class="btn btn-oscuro" id="btn-abrir-prestamo"><i class="bi bi-plus-circle"></i> Registrar Nuevo Préstamo</button>
+        </div>
+      </div>
+
+      <div class="fila-stats" id="stats-prestamos"></div>
+
+      <div class="tabla-contenedor">
+        <div class="tabla-header">
+          <h2>Historial de Préstamos</h2>
+          <div class="flex gap-sm">
+            <select id="filtro-estado-prestamo"><option value="">Filtrar por Estado</option></select>
+          </div>
+        </div>
+        <div class="tabla-scroll"><table class="tabla">
+          <thead><tr><th>Usuario</th><th>Libro</th><th>Fecha Préstamo</th><th>Fecha Devolución</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tabla-prestamos"></tbody>
+        </table></div>
+        <div class="paginacion-contenedor">
+          <span id="info-paginacion-prestamos"></span>
+          <div class="paginacion" id="paginacion-prestamos"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modal Registrar Préstamo -->
+    <div class="modal-overlay" id="modal-prestamo">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="modal-prestamo-titulo">Registrar Nuevo Préstamo</h2>
+          <button class="modal-cerrar" data-cerrar-modal="modal-prestamo"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal-body">
+          <form id="form-prestamo" novalidate>
+            <div class="form-grupo">
+              <label for="prestamo-usuario">Usuario</label>
+              <select id="prestamo-usuario">
+                <option value="">Seleccionar usuario</option>
+              </select>
+            </div>
+            <div class="form-grupo">
+              <label for="prestamo-libro">Libro</label>
+              <select id="prestamo-libro">
+                <option value="">Seleccionar libro</option>
+              </select>
+            </div>
+            <div class="form-fila">
+              <div class="form-grupo">
+                <label for="prestamo-fecha">Fecha de Préstamo</label>
+                <input type="date" id="prestamo-fecha">
+              </div>
+              <div class="form-grupo">
+                <label for="prestamo-devolucion">Fecha de Devolución</label>
+                <input type="date" id="prestamo-devolucion">
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" data-cerrar-modal="modal-prestamo">Cancelar</button>
+          <button class="btn btn-primario" id="btn-guardar-prestamo">Registrar Préstamo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Registrar Devolución -->
+    <div class="modal-overlay" id="modal-devolucion">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Registrar Devolución</h2>
+          <button class="modal-cerrar" data-cerrar-modal="modal-devolucion"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal-body">
+          <form id="form-devolucion" novalidate>
+            <div class="form-grupo">
+              <label for="devolucion-prestamo">Préstamo Activo</label>
+              <select id="devolucion-prestamo">
+                <option value="">Seleccionar préstamo a devolver</option>
+              </select>
+            </div>
+            <div class="form-grupo">
+              <label for="devolucion-estado">Estado del Ejemplar</label>
+              <select id="devolucion-estado">
+                <option value="">Seleccionar estado</option>
+                <option value="buen_estado">Buen estado</option>
+                <option value="dano_menor">Daño menor</option>
+                <option value="requiere_reparacion">Requiere reparación</option>
+              </select>
+            </div>
+            <div class="form-grupo">
+              <label for="devolucion-notas">Notas</label>
+              <textarea id="devolucion-notas" rows="3" placeholder="Observaciones sobre la devolución..."></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" data-cerrar-modal="modal-devolucion">Cancelar</button>
+          <button class="btn btn-primario" id="btn-guardar-devolucion">Confirmar Devolución</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Detalle Préstamo -->
+    <div class="modal-overlay" id="modal-detalle-prestamo">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Detalle del Préstamo</h2>
+          <button class="modal-cerrar" data-cerrar-modal="modal-detalle-prestamo"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal-body" id="detalle-prestamo-contenido"></div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" data-cerrar-modal="modal-detalle-prestamo">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <span>&copy; 2026 BiblioTrack. Todos los derechos reservados.</span>
+    </footer>
+
+    <script src="js/menu.js"></script>
+    <script src="js/prestamos.js"></script>
+  </body>
+</html>

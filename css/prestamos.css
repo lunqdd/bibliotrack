@@ -1,0 +1,6 @@
+/* Ajustes propios de prestamos y devoluciones. */
+
+#tabla-prestamos .isbn-texto {
+  display: inline-block;
+  margin-top: 2px;
+}
