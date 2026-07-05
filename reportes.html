@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiblioTrack — Reportes y Estadísticas</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/reportes.css">
+  </head>
+  <body>
+
+    <aside class="sidebar" id="menu-principal">
+      <div class="sidebar-logo"><img src="img/logo-blanco.png" alt="BiblioTrack"></div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html"><i class="bi bi-grid-1x2"></i> Panel Principal</a>
+        <a href="libros.html"><i class="bi bi-book"></i> Gestión de Libros</a>
+        <a href="usuarios.html"><i class="bi bi-people"></i> Gestión de Usuarios</a>
+        <a href="prestamos.html"><i class="bi bi-arrow-left-right"></i> Préstamos y Devoluciones</a>
+        <a href="inventario.html"><i class="bi bi-box-seam"></i> Inventario</a>
+        <a href="reportes.html" class="activo"><i class="bi bi-bar-chart-line"></i> Reportes y Estadísticas</a>
+        <a href="perfil-admin.html"><i class="bi bi-person"></i> Mi Perfil</a>
+      </nav>
+      <div class="sidebar-usuario">
+        <div class="avatar-sm">LD</div>
+        <div class="detalle">
+          Luna Delgado
+          <span>Administradora</span>
+        </div>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay"></div>
+
+    <header class="topbar">
+      <button class="btn-menu-hamburguesa" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal"><i class="bi bi-list"></i></button>
+      <span class="topbar-titulo">Sistema de Administración</span>
+      <div class="topbar-busqueda"><i class="bi bi-search"></i><input type="search" placeholder="Buscar reportes o libros..."></div>
+      <div class="topbar-acciones">
+        <div class="topbar-usuario" tabindex="0">
+          <div class="info-usuario"><strong>Luna Delgado</strong><span>Administradora</span></div>
+          <div class="avatar">LD</div><div class="menu-usuario"><a href="perfil-admin.html"><i class="bi bi-person"></i> Ver perfil</a><a href="login.html"><i class="bi bi-arrow-return-left"></i> Cerrar sesión</a></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="contenido-principal">
+      <div class="pagina-encabezado">
+        <div>
+          <h1>Reportes</h1>
+          <p>Consulta datos de circulación, usuarios e inventario.</p>
+        </div>
+        <div class="pagina-acciones">
+          <select id="rango-tiempo">
+            <option value="30">Últimos 30 días</option>
+            <option value="90">Últimos 90 días</option>
+            <option value="365">Último año</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="fila-stats" id="stats-reportes"></div>
+
+      <div class="reportes-grid">
+        <div class="card">
+          <h3>Movimiento Mensual de Libros</h3>
+          <div class="leyenda-grafico">
+            <span class="leyenda-item"><span class="leyenda-color leyenda-prestados"></span> Prestados</span>
+            <span class="leyenda-item"><span class="leyenda-color leyenda-devueltos"></span> Devueltos</span>
+          </div>
+          <div class="grafico-barras-doble" id="grafico-flujo"></div>
+        </div>
+        <div class="card">
+          <h3>Libros Más Prestados</h3>
+          <div id="libros-mas-prestados"></div>
+        </div>
+      </div>
+
+      <div class="reportes-grid mt-lg">
+        <div class="card">
+          <h3>Usuarios Más Activos</h3>
+          <div id="usuarios-mas-activos"></div>
+        </div>
+        <div class="card">
+          <h3>Estado General del Inventario</h3>
+          <div id="estado-inventario"></div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <span>&copy; 2026 BiblioTrack. Todos los derechos reservados.</span>
+    </footer>
+
+    <script src="js/menu.js"></script>
+    <script src="js/reportes.js"></script>
+  </body>
+</html>

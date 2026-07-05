@@ -1,0 +1,9 @@
+/* Ajustes propios de reportes. */
+
+#rango-tiempo {
+  min-width: 160px;
+}
+
+.reportes-grid .card {
+  min-height: 260px;
+}
