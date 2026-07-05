@@ -1,0 +1,13 @@
+/* Ajustes propios del perfil administrativo. */
+
+#perfil-admin-contenido {
+  max-width: 760px;
+}
+
+.perfil-acciones {
+  flex-wrap: wrap;
+}
+
+.perfil-admin-badge {
+  margin-top: 6px;
+}

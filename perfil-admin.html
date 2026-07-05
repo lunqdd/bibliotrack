@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiblioTrack — Perfil Administrativo</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/perfil-admin.css">
+  </head>
+  <body>
+    <aside class="sidebar" id="menu-principal">
+      <div class="sidebar-logo"><img src="img/logo-blanco.png" alt="BiblioTrack"></div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html"><i class="bi bi-grid-1x2"></i> Panel Principal</a>
+        <a href="libros.html"><i class="bi bi-book"></i> Gestión de Libros</a>
+        <a href="usuarios.html"><i class="bi bi-people"></i> Gestión de Usuarios</a>
+        <a href="prestamos.html"><i class="bi bi-arrow-left-right"></i> Préstamos y Devoluciones</a>
+        <a href="inventario.html"><i class="bi bi-box-seam"></i> Inventario</a>
+        <a href="reportes.html"><i class="bi bi-bar-chart-line"></i> Reportes y Estadísticas</a>
+        <a href="perfil-admin.html" class="activo"><i class="bi bi-person"></i> Mi Perfil</a>
+      </nav>
+      <div class="sidebar-usuario">
+        <div class="avatar-sm">LD</div>
+        <div class="detalle">
+          Luna Delgado
+          <span>Administradora</span>
+        </div>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay"></div>
+
+    <header class="topbar">
+      <button class="btn-menu-hamburguesa" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal"><i class="bi bi-list"></i></button>
+      <span class="topbar-titulo">Perfil Administrativo</span>
+      <div class="topbar-busqueda"><i class="bi bi-search"></i><input type="search" placeholder="Buscar en el sistema..."></div>
+      <div class="topbar-acciones">
+        <div class="topbar-usuario" tabindex="0">
+          <div class="info-usuario"><strong>Luna Delgado</strong><span>Administradora</span></div>
+          <div class="avatar">LD</div>
+          <div class="menu-usuario">
+            <a href="perfil-admin.html"><i class="bi bi-person"></i> Ver perfil</a>
+            <a href="login.html"><i class="bi bi-arrow-return-left"></i> Cerrar sesión</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="contenido-principal">
+      <div class="pagina-encabezado">
+        <div>
+          <h1>Mi Perfil</h1>
+          <p>Información de la cuenta administrativa activa.</p>
+        </div>
+      </div>
+
+      <div class="card" id="perfil-admin-contenido"></div>
+
+      <!-- Modal Editar Perfil -->
+      <div class="modal-overlay" id="modal-editar-perfil-admin">
+        <div class="modal">
+          <div class="modal-header">
+            <h2>Editar Perfil</h2>
+            <button class="modal-cerrar" data-cerrar-modal="modal-editar-perfil-admin"><i class="bi bi-x-lg"></i></button>
+          </div>
+          <div class="modal-body">
+            <form id="form-perfil-admin" novalidate>
+              <div class="form-fila">
+                <div class="form-grupo">
+                  <label for="perfil-admin-nombre">Nombre Completo</label>
+                  <input type="text" id="perfil-admin-nombre">
+                </div>
+                <div class="form-grupo">
+                  <label for="perfil-admin-correo">Correo Electrónico</label>
+                  <input type="email" id="perfil-admin-correo">
+                </div>
+              </div>
+              <div class="form-fila">
+                <div class="form-grupo">
+                  <label for="perfil-admin-telefono">Teléfono</label>
+                  <input type="tel" id="perfil-admin-telefono">
+                </div>
+                <div class="form-grupo">
+                  <label for="perfil-admin-direccion">Dirección</label>
+                  <input type="text" id="perfil-admin-direccion">
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline" data-cerrar-modal="modal-editar-perfil-admin">Cancelar</button>
+            <button class="btn btn-primario" id="btn-guardar-perfil-admin">Guardar Cambios</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Cambiar Contraseña -->
+      <div class="modal-overlay" id="modal-cambiar-clave-admin">
+        <div class="modal">
+          <div class="modal-header">
+            <h2>Cambiar Contraseña</h2>
+            <button class="modal-cerrar" data-cerrar-modal="modal-cambiar-clave-admin"><i class="bi bi-x-lg"></i></button>
+          </div>
+          <div class="modal-body">
+            <form id="form-clave-admin" novalidate>
+              <div class="form-grupo">
+                <label for="clave-admin-actual">Contraseña Actual</label>
+                <input type="password" id="clave-admin-actual" placeholder="••••••••">
+                <span class="mensaje-error" id="error-clave-admin-actual"></span>
+              </div>
+              <div class="form-grupo">
+                <label for="clave-admin-nueva">Nueva Contraseña</label>
+                <input type="password" id="clave-admin-nueva" placeholder="Mínimo 8 caracteres">
+                <span class="mensaje-error" id="error-clave-admin-nueva"></span>
+              </div>
+              <div class="form-grupo">
+                <label for="clave-admin-confirmar">Confirmar Nueva Contraseña</label>
+                <input type="password" id="clave-admin-confirmar" placeholder="Repetir contraseña">
+                <span class="mensaje-error" id="error-clave-admin-confirmar"></span>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline" data-cerrar-modal="modal-cambiar-clave-admin">Cancelar</button>
+            <button class="btn btn-primario" id="btn-cambiar-clave-admin-modal">Actualizar Contraseña</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer"><span>&copy; 2026 BiblioTrack. Todos los derechos reservados.</span></footer>
+    <script src="js/menu.js"></script>
+    <script src="js/perfil-admin.js"></script>
+  </body>
+</html>
