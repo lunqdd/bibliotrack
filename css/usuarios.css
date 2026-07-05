@@ -1,0 +1,9 @@
+/* Ajustes propios de gestion de usuarios. */
+
+#buscar-usuario {
+  min-width: 240px;
+}
+
+.celda-usuario {
+  min-width: 220px;
+}
