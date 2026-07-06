@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiblioTrack — Explorar Libros</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/explorar.css">
+  </head>
+  <body>
+    <aside class="sidebar" id="menu-principal">
+      <div class="sidebar-logo"><img src="img/logo-blanco.png" alt="BiblioTrack"></div>
+      <nav class="sidebar-nav">
+        <a href="lector.html"><i class="bi bi-grid-1x2"></i> Panel del Lector</a>
+        <a href="explorar.html" class="activo"><i class="bi bi-book"></i> Explorar Libros</a>
+        <a href="mis-prestamos.html"><i class="bi bi-journal-text"></i> Mis Préstamos</a>
+        <a href="perfil.html"><i class="bi bi-person"></i> Mi Perfil</a>
+      </nav>
+      <div class="sidebar-usuario">
+        <div class="avatar-sm">DJ</div>
+        <div class="detalle">Derek Jensen<span>Socio #4021</span></div>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay"></div>
+
+    <header class="topbar">
+      <button class="btn-menu-hamburguesa" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal"><i class="bi bi-list"></i></button>
+      <span class="topbar-titulo">Explorar Catálogo</span>
+      <div class="topbar-busqueda"><i class="bi bi-search"></i><input type="search" placeholder="Buscar libros..."></div>
+      <div class="topbar-acciones">
+        <div class="topbar-usuario" tabindex="0">
+          <div class="info-usuario"><strong>Derek Jensen</strong><span>Lector</span></div>
+          <div class="avatar">DJ</div><div class="menu-usuario"><a href="perfil.html"><i class="bi bi-person"></i> Ver perfil</a><a href="login.html"><i class="bi bi-arrow-return-left"></i> Cerrar sesión</a></div>
+        </div>
+      </div>
+    </header>
+    <main class="contenido-principal">
+      <div class="pagina-encabezado">
+        <div>
+          <h1>Explorar Libros</h1>
+          <p>Descubre el catálogo de la biblioteca y solicita un préstamo.</p>
+        </div>
+      </div>
+      <div class="mensaje-exito mensaje-catalogo" id="mensaje-catalogo"></div>
+      <div class="tabla-contenedor">
+        <div class="tabla-filtros">
+          <input type="search" id="buscar-catalogo" placeholder="Buscar por título o autor...">
+          <select id="filtro-cat-genero"><option value="">Todas las categorías</option></select>
+        </div>
+        <div class="tabla-scroll">
+          <table class="tabla">
+            <thead><tr><th>Portada</th><th>Libro</th><th>Categoría</th><th>Disponibilidad</th><th>Acción</th></tr></thead>
+            <tbody id="tabla-catalogo"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+    <div class="modal-overlay" id="modal-catalogo">
+      <div class="modal modal-confirmacion">
+        <div class="modal-header">
+          <h2 id="modal-catalogo-titulo">Confirmar Solicitud</h2>
+          <button class="modal-cerrar" data-cerrar-modal="modal-catalogo"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal-body">
+          <p id="texto-catalogo">Confirma la acción para este libro.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" data-cerrar-modal="modal-catalogo">Cancelar</button>
+          <button class="btn btn-primario" id="btn-confirmar-catalogo">Confirmar</button>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <span>&copy; 2026 BiblioTrack. Todos los derechos reservados.</span>
+    </footer>
+    <script src="js/menu.js"></script>
+    <script src="js/explorar.js"></script>
+  </body>
+</html>

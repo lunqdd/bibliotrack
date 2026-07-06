@@ -1,0 +1,9 @@
+/* Ajustes propios de explorar libros. */
+
+#buscar-catalogo {
+  min-width: 260px;
+}
+
+#tabla-catalogo .btn {
+  min-width: 92px;
+}
