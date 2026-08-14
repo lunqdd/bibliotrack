@@ -17,10 +17,10 @@ if (isset($partesNombre[1])) {
 
 $navAdmin = [
     ['key' => 'dashboard',    'href' => 'index.php?controller=dashboard&action=index', 'icon' => 'bi-grid-1x2',        'label' => 'Panel Principal'],
-    ['key' => 'libros',       'href' => 'libros.html',                                 'icon' => 'bi-book',            'label' => 'Gestión de Libros'],
+    ['key' => 'libros',       'href' => 'index.php?controller=libro&action=index',     'icon' => 'bi-book',            'label' => 'Gestión de Libros'],
     ['key' => 'usuarios',     'href' => 'usuarios.html',                               'icon' => 'bi-people',          'label' => 'Gestión de Usuarios'],
     ['key' => 'prestamos',    'href' => 'prestamos.html',                              'icon' => 'bi-arrow-left-right','label' => 'Préstamos y Devoluciones'],
-    ['key' => 'inventario',   'href' => 'inventario.html',                             'icon' => 'bi-box-seam',        'label' => 'Inventario'],
+    ['key' => 'inventario',   'href' => 'index.php?controller=inventario&action=index','icon' => 'bi-box-seam',        'label' => 'Inventario'],
     ['key' => 'reportes',     'href' => 'reportes.html',                               'icon' => 'bi-bar-chart-line',  'label' => 'Reportes y Estadísticas'],
     ['key' => 'perfil-admin', 'href' => 'perfil-admin.html',                           'icon' => 'bi-person',          'label' => 'Mi Perfil'],
 ];

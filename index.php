@@ -132,6 +132,20 @@ switch ($action) {
         }
         break;
 
+    case 'buscarLibros':
+        // GET (AJAX): catálogo administrable de libros filtrado en JSON
+        if ($method === 'GET') {
+            $controller->buscarLibros();
+        }
+        break;
+
+    case 'buscarInventario':
+        // GET (AJAX): inventario filtrado en JSON
+        if ($method === 'GET') {
+            $controller->buscarInventario();
+        }
+        break;
+
     default:
         http_response_code(404);
         die('<h2>404 - Acción no encontrada.</h2>');

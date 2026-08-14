@@ -22,7 +22,7 @@ $tarjetas = [
 ];
 
 $acciones = [
-    ['icono' => 'bi-book', 'texto' => 'Registrar Libro', 'destino' => 'libros.html#registrar-libro'],
+    ['icono' => 'bi-book', 'texto' => 'Registrar Libro', 'destino' => 'index.php?controller=libro&action=index#registrar-libro'],
     ['icono' => 'bi-arrow-left-right', 'texto' => 'Nuevo Préstamo', 'destino' => 'prestamos.html#nuevo-prestamo'],
     ['icono' => 'bi-person-plus', 'texto' => 'Registrar Usuario', 'destino' => 'usuarios.html#registrar-usuario'],
 ];
