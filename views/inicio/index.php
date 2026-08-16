@@ -1,5 +1,10 @@
 <?php
 $pageTitle = 'Inicio';
+date_default_timezone_set('America/Costa_Rica');
+session_start();
+
+require_once 'config/database.php';
+
 ?>
 
 <!DOCTYPE html>

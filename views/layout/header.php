@@ -18,11 +18,11 @@ if (isset($partesNombre[1])) {
 $navAdmin = [
     ['key' => 'dashboard',    'href' => 'index.php?controller=dashboard&action=index', 'icon' => 'bi-grid-1x2',        'label' => 'Panel Principal'],
     ['key' => 'libros',       'href' => 'index.php?controller=libro&action=index',     'icon' => 'bi-book',            'label' => 'Gestión de Libros'],
-    ['key' => 'usuarios',     'href' => 'usuarios.html',                               'icon' => 'bi-people',          'label' => 'Gestión de Usuarios'],
+    ['key' => 'usuarios',     'href' => 'index.php?controller=usuario&action=index',                               'icon' => 'bi-people',          'label' => 'Gestión de Usuarios'],
     ['key' => 'prestamos',    'href' => 'prestamos.html',                              'icon' => 'bi-arrow-left-right','label' => 'Préstamos y Devoluciones'],
     ['key' => 'inventario',   'href' => 'index.php?controller=inventario&action=index','icon' => 'bi-box-seam',        'label' => 'Inventario'],
     ['key' => 'reportes',     'href' => 'reportes.html',                               'icon' => 'bi-bar-chart-line',  'label' => 'Reportes y Estadísticas'],
-    ['key' => 'perfil-admin', 'href' => 'perfil-admin.html',                           'icon' => 'bi-person',          'label' => 'Mi Perfil'],
+    ['key' => 'perfil-admin', 'href' => 'index.php?controller=perfiladmin&action=index',  'icon' => 'bi-person', 'label' => 'Mi Perfil'],
 ];
 
 $navLector = [
@@ -91,4 +91,4 @@ $perfilHref = $rolSesion === 'admin' ? 'perfil-admin.html' : 'index.php?controll
       </div>
     </header>
 
-    <main class="contenido-principal">
+    <main class="contenido-principal"></main>
