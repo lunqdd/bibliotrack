@@ -1,13 +1,11 @@
 <?php
 // Vistas que incluyen este layout deben definir antes:
 // $pageTitle, $pageCss, $topbarTitulo y $activeNav.
-// Opcional: $searchPlaceholder.
 
 $usuarioSesion   = $_SESSION['usuario'] ?? null;
 $rolSesion       = $usuarioSesion['rol'] ?? 'lector';
 $nombreCompleto  = $usuarioSesion['nombre_completo'] ?? 'Invitado';
 $rolLabel        = $rolSesion === 'admin' ? 'Administradora' : 'Lector';
-$searchPlaceholder = $searchPlaceholder ?? 'Buscar...';
 
 $partesNombre = preg_split('/\s+/', trim($nombreCompleto));
 $iniciales = mb_strtoupper(mb_substr($partesNombre[0] ?? '', 0, 1));
@@ -17,12 +15,12 @@ if (isset($partesNombre[1])) {
 
 $navAdmin = [
     ['key' => 'dashboard',    'href' => 'index.php?controller=dashboard&action=index', 'icon' => 'bi-grid-1x2',        'label' => 'Panel Principal'],
-    ['key' => 'libros',       'href' => 'index.php?controller=libro&action=index',     'icon' => 'bi-book',            'label' => 'Gestión de Libros'],
-    ['key' => 'usuarios',     'href' => 'index.php?controller=usuario&action=index',                               'icon' => 'bi-people',          'label' => 'Gestión de Usuarios'],
-    ['key' => 'prestamos',    'href' => 'prestamos.html',                              'icon' => 'bi-arrow-left-right','label' => 'Préstamos y Devoluciones'],
+    ['key' => 'libros',       'href' => 'index.php?controller=libros&action=index',    'icon' => 'bi-book',            'label' => 'Gestión de Libros'],
+    ['key' => 'usuarios',     'href' => 'index.php?controller=usuarios&action=index',  'icon' => 'bi-people',          'label' => 'Gestión de Usuarios'],
+    ['key' => 'prestamos',    'href' => 'index.php?controller=prestamos&action=index', 'icon' => 'bi-arrow-left-right','label' => 'Préstamos y Devoluciones'],
     ['key' => 'inventario',   'href' => 'index.php?controller=inventario&action=index','icon' => 'bi-box-seam',        'label' => 'Inventario'],
-    ['key' => 'reportes',     'href' => 'reportes.html',                               'icon' => 'bi-bar-chart-line',  'label' => 'Reportes y Estadísticas'],
-    ['key' => 'perfil-admin', 'href' => 'index.php?controller=perfiladmin&action=index',  'icon' => 'bi-person', 'label' => 'Mi Perfil'],
+    ['key' => 'reportes',     'href' => 'index.php?controller=reportes&action=index',  'icon' => 'bi-bar-chart-line',  'label' => 'Reportes y Estadísticas'],
+    ['key' => 'perfil-admin', 'href' => 'index.php?controller=dashboard&action=perfil', 'icon' => 'bi-person',          'label' => 'Mi Perfil'],
 ];
 
 $navLector = [
@@ -33,7 +31,7 @@ $navLector = [
 ];
 
 $navLinks   = $rolSesion === 'admin' ? $navAdmin : $navLector;
-$perfilHref = $rolSesion === 'admin' ? 'perfil-admin.html' : 'index.php?controller=lector&action=perfil';
+$perfilHref = $rolSesion === 'admin' ? 'index.php?controller=dashboard&action=perfil' : 'index.php?controller=lector&action=perfil';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -72,10 +70,6 @@ $perfilHref = $rolSesion === 'admin' ? 'perfil-admin.html' : 'index.php?controll
     <header class="topbar">
       <button class="btn-menu-hamburguesa" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal"><i class="bi bi-list"></i></button>
       <span class="topbar-titulo"><?= htmlspecialchars($topbarTitulo) ?></span>
-      <div class="topbar-busqueda">
-        <i class="bi bi-search"></i>
-        <input type="search" placeholder="<?= htmlspecialchars($searchPlaceholder) ?>">
-      </div>
       <div class="topbar-acciones">
         <div class="topbar-usuario" tabindex="0">
           <div class="info-usuario">
@@ -91,4 +85,4 @@ $perfilHref = $rolSesion === 'admin' ? 'perfil-admin.html' : 'index.php?controll
       </div>
     </header>
 
-    <main class="contenido-principal"></main>
+    <main class="contenido-principal">
