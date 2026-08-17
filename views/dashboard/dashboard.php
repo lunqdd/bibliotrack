@@ -22,9 +22,9 @@ $tarjetas = [
 ];
 
 $acciones = [
-    ['icono' => 'bi-book', 'texto' => 'Registrar Libro', 'destino' => 'index.php?controller=libro&action=index#registrar-libro'],
-    ['icono' => 'bi-arrow-left-right', 'texto' => 'Nuevo Préstamo', 'destino' => 'prestamos.html#nuevo-prestamo'],
-    ['icono' => 'bi-person-plus', 'texto' => 'Registrar Usuario', 'destino' => 'usuarios.html#registrar-usuario'],
+    ['icono' => 'bi-book', 'texto' => 'Registrar Libro', 'destino' => 'index.php?controller=libros&action=index#registrar-libro'],
+    ['icono' => 'bi-arrow-left-right', 'texto' => 'Nuevo Préstamo', 'destino' => 'index.php?controller=prestamos&action=index#nuevo-prestamo'],
+    ['icono' => 'bi-person-plus', 'texto' => 'Registrar Usuario', 'destino' => 'index.php?controller=usuarios&action=index#registrar-usuario'],
 ];
 
 $badgesAccion = ['Préstamo' => 'alerta', 'Devolución' => 'exito'];
@@ -38,9 +38,6 @@ require __DIR__ . '/../layout/header.php';
   <div>
     <h1><?= htmlspecialchars($saludo) ?>, <?= htmlspecialchars($primerNombre) ?></h1>
     <p><?= htmlspecialchars($fechaTexto) ?></p>
-  </div>
-  <div class="pagina-acciones">
-    <span class="badge badge-exito"><i class="bi bi-check-circle"></i> Sistema activo</span>
   </div>
 </div>
 
