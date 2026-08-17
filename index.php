@@ -146,6 +146,20 @@ switch ($action) {
         }
         break;
 
+    case 'aprobarSolicitud':
+        // POST (AJAX): convierte una solicitud del lector en un préstamo real
+        if ($method === 'POST') {
+            $controller->aprobarSolicitud();
+        }
+        break;
+
+    case 'rechazarSolicitud':
+        // POST (AJAX): rechaza una solicitud pendiente del lector
+        if ($method === 'POST') {
+            $controller->rechazarSolicitud();
+        }
+        break;
+
     default:
         http_response_code(404);
         die('<h2>404 - Acción no encontrada.</h2>');

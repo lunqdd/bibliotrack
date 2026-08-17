@@ -27,8 +27,6 @@
    xs=4  sm=12  md=24  lg=40  xl=64
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 :root {
   --primary: #33210d;
   --primary-container: #4b3621;

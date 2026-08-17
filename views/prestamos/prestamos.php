@@ -75,6 +75,31 @@ require __DIR__ . '/../layout/header.php';
   </div>
 </div>
 
+<?php if (!empty($solicitudes)): ?>
+<div class="tabla-contenedor mb-lg">
+  <div class="tabla-header">
+    <h2>Solicitudes Pendientes <span class="badge badge-alerta"><?= (int) $stats['solicitudesPendientes'] ?></span></h2>
+  </div>
+  <div class="tabla-scroll"><table class="tabla">
+    <thead><tr><th>Usuario</th><th>Libro</th><th>Fecha de Solicitud</th><th>Notas</th><th>Acciones</th></tr></thead>
+    <tbody id="tabla-solicitudes">
+      <?php foreach ($solicitudes as $s): ?>
+        <tr>
+          <td><?= htmlspecialchars($s['nombre_completo']) ?></td>
+          <td><?= htmlspecialchars($s['titulo']) ?></td>
+          <td><?= htmlspecialchars((new DateTime($s['fecha_solicitud']))->format('d M Y')) ?></td>
+          <td><?= htmlspecialchars($s['notas'] ?? '') ?></td>
+          <td class="acciones-celda">
+            <button class="btn btn-primario btn-sm" data-accion="aprobar" data-id="<?= (int) $s['solicitud_id'] ?>">Aprobar</button>
+            <button class="btn btn-outline btn-sm" data-accion="rechazar" data-id="<?= (int) $s['solicitud_id'] ?>">Rechazar</button>
+          </td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table></div>
+</div>
+<?php endif; ?>
+
 <div class="tabla-contenedor">
   <div class="tabla-header">
     <h2>Historial de Préstamos</h2>
