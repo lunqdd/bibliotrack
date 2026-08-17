@@ -1,77 +1,77 @@
 //menu.js
 //Funcionalidades compartidas de navegación:
 // - Menú hamburguesa en vistas móviles.
-//- Dropdown del usuario en la barra superior.
+// - Dropdown del usuario en la barra superior.
+// - Cierre de sesión por AJAX.
 //Se vincula en todas las páginas que usan sidebar + topbar.
- 
-(function () {
-  'use strict';
+
+$(function () {
+
+  //Cierra la sesión por AJAX y redirige al inicio.
+  $('#btn-logout').on('click', function (evento) {
+    evento.preventDefault();
+    $.post('index.php?controller=login&action=logout', function () {
+      window.location = 'index.php';
+    });
+  });
 
   //Controla el dropdown del perfil de usuario en el topbar.
-  function inicializarMenuUsuario() {
-    let usuario = document.querySelector('.topbar-usuario');
-    if (!usuario) return;
+  let usuario = $('.topbar-usuario');
+  let menuUsuario = usuario.find('.menu-usuario');
 
-    let menu = usuario.querySelector('.menu-usuario');
-    if (!menu) return;
-
-    usuario.addEventListener('click', function (evento) {
+  if (usuario.length && menuUsuario.length) {
+    usuario.on('click', function (evento) {
       evento.stopPropagation();
-      menu.classList.toggle('visible');
+      menuUsuario.toggleClass('visible');
     });
 
-    document.addEventListener('click', function () {
-      menu.classList.remove('visible');
+    $(document).on('click', function () {
+      menuUsuario.removeClass('visible');
     });
 
-    document.addEventListener('keydown', function (evento) {
-      if (evento.key === 'Escape') menu.classList.remove('visible');
+    $(document).on('keydown', function (evento) {
+      if (evento.key === 'Escape') menuUsuario.removeClass('visible');
     });
   }
 
-   //Controla el menú hamburguesa en vistas móviles.
-   //En escritorio el sidebar es fijo, por lo que el botón no se muestra.
-  function inicializarMenuHamburguesa() {
-    let boton = document.querySelector('.btn-menu-hamburguesa');
-    let sidebar = document.querySelector('.sidebar');
-    let overlay = document.querySelector('.sidebar-overlay');
+  //Controla el menú hamburguesa en vistas móviles.
+  //En escritorio el sidebar es fijo, por lo que el botón no se muestra.
+  let boton = $('.btn-menu-hamburguesa');
+  let sidebar = $('.sidebar');
+  let overlay = $('.sidebar-overlay');
 
-    if (!boton || !sidebar) return;
+  if (boton.length && sidebar.length) {
 
     function abrir() {
-      sidebar.classList.add('abierto');
-      if (overlay) overlay.classList.add('visible');
-      boton.setAttribute('aria-expanded', 'true');
+      sidebar.addClass('abierto');
+      overlay.addClass('visible');
+      boton.attr('aria-expanded', 'true');
     }
 
     function cerrar() {
-      sidebar.classList.remove('abierto');
-      if (overlay) overlay.classList.remove('visible');
-      boton.setAttribute('aria-expanded', 'false');
+      sidebar.removeClass('abierto');
+      overlay.removeClass('visible');
+      boton.attr('aria-expanded', 'false');
     }
 
-    boton.addEventListener('click', function () {
-      if (sidebar.classList.contains('abierto')) {
+    boton.on('click', function () {
+      if (sidebar.hasClass('abierto')) {
         cerrar();
       } else {
         abrir();
       }
     });
 
-    if (overlay) {
-      overlay.addEventListener('click', cerrar);
-    }
+    overlay.on('click', cerrar);
 
-    document.addEventListener('keydown', function (evento) {
+    $(document).on('keydown', function (evento) {
       if (evento.key === 'Escape') cerrar();
     });
 
     //Si se redimensiona a escritorio, cerrar el menú móvil.
-    window.addEventListener('resize', function () {
-      if (window.innerWidth > 768) cerrar();
+    $(window).on('resize', function () {
+      if ($(window).width() > 768) cerrar();
     });
   }
 
-  inicializarMenuUsuario();
-  inicializarMenuHamburguesa();
-})();
+});

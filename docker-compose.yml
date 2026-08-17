@@ -1,6 +1,6 @@
 services:
   web:
-    image: php:8.2-apache   
+    build: .
     container_name: BiblioTrack-web
     ports:
       - "8080:80"
@@ -30,8 +30,8 @@ services:
       - db
     environment:
       PMA_HOST: db
-      PMA_USER: appuser
-      PMA_PASSWORD: apppass
+      PMA_USER: root
+      PMA_PASSWORD: root
     ports:
       - "8082:80"   # phpMyAdmin -> http://localhost:8082
 
