@@ -132,17 +132,17 @@ switch ($action) {
         }
         break;
 
-    case 'buscarLibros':
-        // GET (AJAX): catálogo administrable de libros filtrado en JSON
-        if ($method === 'GET') {
-            $controller->buscarLibros();
+    case 'registrarDevolucion':
+        // POST (AJAX): cierra un préstamo activo desde Préstamos y Devoluciones
+        if ($method === 'POST') {
+            $controller->registrarDevolucion();
         }
         break;
 
-    case 'buscarInventario':
-        // GET (AJAX): inventario filtrado en JSON
-        if ($method === 'GET') {
-            $controller->buscarInventario();
+    case 'actualizarInventario':
+        // POST (AJAX): mueve una sección y ajusta ejemplares en estante
+        if ($method === 'POST') {
+            $controller->actualizarInventario();
         }
         break;
 

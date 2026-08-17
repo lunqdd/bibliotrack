@@ -12,64 +12,47 @@ class InventarioController
         $this->model = new InventarioModel();
     }
 
-    // GET ?controller=inventario&action=index. Existencias por ubicación física
+    // GET ?controller=inventario&action=index. Existencias por libro y ubicación
     public function index(): void
     {
-        $busqueda = trim($_GET['q'] ?? '');
-        $estado   = trim($_GET['estado'] ?? '');
+        $secciones = $this->model->getResumen();
 
-        $inventario = $this->model->getListado($busqueda, $estado);
-        $stats      = $this->model->obtenerStats();
+        $totalEjemplares = $this->model->contarTotalEjemplares();
+        $disponibles     = $this->model->contarPorEstado('disponible');
+        $prestados       = $this->model->contarPorEstado('prestado');
+        $enReparacion    = $this->model->contarPorEstado('en_reparacion');
+
+        $stats = [
+            'totalEjemplares' => $totalEjemplares,
+            'disponibles'     => $disponibles,
+            'prestados'       => $prestados,
+            'enReparacion'    => $enReparacion,
+            'porcentajeDisponibles' => $totalEjemplares > 0 ? round(($disponibles / $totalEjemplares) * 100) : 0,
+            'porcentajePrestados'   => $totalEjemplares > 0 ? round(($prestados / $totalEjemplares) * 100) : 0,
+        ];
 
         require __DIR__ . '/../views/inventario/inventario.php';
     }
 
-    // GET ?controller=inventario&action=buscarInventario (AJAX). Listado filtrado en JSON
-    public function buscarInventario(): void
-    {
-        $busqueda = trim($_GET['q'] ?? '');
-        $estado   = trim($_GET['estado'] ?? '');
-
-        header('Content-Type: application/json');
-        echo json_encode(['inventario' => $this->model->getListado($busqueda, $estado)]);
-    }
-
-    // GET ?controller=inventario&action=edit&id= (AJAX). Datos de una ubicación para el modal de edición
-    public function edit(int $id): void
-    {
-        header('Content-Type: application/json');
-        $fila = $this->model->getByLibroId($id);
-
-        if (!$fila) {
-            echo json_encode(['response' => '01', 'message' => 'Registro no encontrado.']);
-            return;
-        }
-
-        echo json_encode(['response' => '00', 'item' => $fila]);
-    }
-
-    // POST ?controller=inventario&action=update&id= (AJAX). Reubica el libro y ajusta la estantería
-    public function update(int $id): void
+    // POST ?controller=inventario&action=actualizarInventario (AJAX). Mueve una sección y ajusta ejemplares en estante
+    public function actualizarInventario(): void
     {
         header('Content-Type: application/json');
 
-        $pasillo   = trim($_POST['pasillo'] ?? '');
-        $estante   = trim($_POST['estante'] ?? '');
-        $enEstante = (int) ($_POST['en_estante'] ?? -1);
+        $libroId     = (int) ($_POST['libro_id'] ?? 0);
+        $ubicacionId = (int) ($_POST['ubicacion_id'] ?? 0);
+        $pasillo     = trim($_POST['pasillo'] ?? '');
+        $estante     = trim($_POST['estante'] ?? '');
+        $enEstante   = (int) ($_POST['en_estante'] ?? -1);
 
-        if ($pasillo === '' || $estante === '' || $enEstante < 0) {
-            echo json_encode(['response' => '01', 'message' => 'Completa el pasillo, el estante y la cantidad en estante.']);
+        if ($libroId <= 0 || $ubicacionId <= 0 || empty($pasillo) || empty($estante) || $enEstante < 0) {
+            echo json_encode(['response' => '01', 'message' => 'Todos los campos son obligatorios.']);
             return;
         }
 
-        $actualizado = $this->model->actualizarUbicacion($id, $pasillo, $estante, $enEstante);
+        $this->model->actualizarSeccion($libroId, $ubicacionId, $pasillo, $estante, $enEstante);
 
-        if (!$actualizado) {
-            echo json_encode(['response' => '01', 'message' => 'La cantidad en estante no puede superar los ejemplares que no están prestados.']);
-            return;
-        }
-
-        echo json_encode(['response' => '00', 'message' => 'Ubicación actualizada.']);
+        echo json_encode(['response' => '00', 'message' => 'Inventario actualizado.']);
     }
 
     private function requerirAdmin(): void

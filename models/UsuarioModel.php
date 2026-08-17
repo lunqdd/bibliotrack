@@ -89,131 +89,96 @@ class UsuarioModel
         ]);
     }
 
-    public function getAdminListado(string $busqueda = '', string $rol = '', string $estado = ''): array
+    // Listado completo para la gestión administrativa de usuarios
+    public function getAll(): array
     {
         $sql = "
-            SELECT usuario_id, codigo, nombre_completo, identificacion, correo, telefono, direccion, rol, estado, fecha_registro
+            SELECT usuario_id, codigo, nombre_completo, identificacion, correo, telefono,
+                   direccion, rol, estado, fecha_registro
             FROM usuarios
-            WHERE (nombre_completo LIKE :busqueda1 OR correo LIKE :busqueda2 OR identificacion LIKE :busqueda3)
+            ORDER BY fecha_registro DESC
         ";
-
-        $params = [
-            ':busqueda1' => '%' . $busqueda . '%',
-            ':busqueda2' => '%' . $busqueda . '%',
-            ':busqueda3' => '%' . $busqueda . '%',
-        ];
-
-        if ($rol !== '') {
-            $sql .= ' AND rol = :rol';
-            $params[':rol'] = $rol;
-        }
-
-        if ($estado !== '') {
-            $sql .= ' AND estado = :estado';
-            $params[':estado'] = $estado;
-        }
-
-        $sql .= ' ORDER BY nombre_completo';
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-        $usuarios = $stmt->fetchAll();
-
-        foreach ($usuarios as &$usuario) {
-            $usuario['iniciales'] = $this->iniciales($usuario['nombre_completo']);
-            $usuario['color'] = $this->colorAvatar((int) $usuario['usuario_id']);
-            $usuario['fecha_registro_texto'] = 'Registrado el ' . (new DateTime($usuario['fecha_registro']))->format('d M, Y');
-        }
-        unset($usuario);
-
-        return $usuarios;
+        return $this->db->query($sql)->fetchAll();
     }
 
-    public function obtenerStats(): array
+    // Registra un usuario nuevo desde el panel de administración
+    public function create(array $data): bool
     {
-        $total = (int) $this->db->query('SELECT COUNT(*) FROM usuarios')->fetchColumn();
-        $activos = (int) $this->db->query("SELECT COUNT(*) FROM usuarios WHERE estado = 'activo'")->fetchColumn();
-        $conPrestamos = (int) $this->db->query(
-            "SELECT COUNT(DISTINCT p.usuario_id)
-             FROM prestamos p
-             LEFT JOIN devoluciones d ON d.prestamo_id = p.prestamo_id
-             WHERE d.devolucion_id IS NULL"
-        )->fetchColumn();
-        $nuevosEsteMes = (int) $this->db->query(
-            "SELECT COUNT(*) FROM usuarios
-             WHERE MONTH(fecha_registro) = MONTH(CURDATE()) AND YEAR(fecha_registro) = YEAR(CURDATE())"
-        )->fetchColumn();
-
-        return [
-            'total'         => $total,
-            'activos'       => $activos,
-            'conPrestamos'  => $conPrestamos,
-            'nuevosEsteMes' => $nuevosEsteMes,
-        ];
-    }
-
-    public function create(array $data): int
-    {
-        $codigo       = $this->siguienteCodigo();
-        $passwordHash = password_hash($data['identificacion'], PASSWORD_DEFAULT);
-
         $stmt = $this->db->prepare(
-            'INSERT INTO usuarios (codigo, nombre_completo, identificacion, correo, telefono, direccion, password_hash, rol, estado)
-             VALUES (:codigo, :nombre_completo, :identificacion, :correo, :telefono, :direccion, :password_hash, :rol, "activo")'
+            "INSERT INTO usuarios (codigo, nombre_completo, identificacion, correo, telefono, direccion, password_hash, rol, estado)
+             VALUES (:codigo, :nombre_completo, :identificacion, :correo, :telefono, :direccion, :password_hash, :rol, 'activo')"
         );
-        $stmt->execute([
-            ':codigo'          => $codigo,
+
+        return $stmt->execute([
+            ':codigo'          => $this->generarCodigo(),
             ':nombre_completo' => $data['nombre_completo'],
             ':identificacion'  => $data['identificacion'],
             ':correo'          => $data['correo'],
-            ':telefono'        => $data['telefono'] !== '' ? $data['telefono'] : null,
-            ':direccion'       => $data['direccion'] !== '' ? $data['direccion'] : null,
-            ':password_hash'   => $passwordHash,
+            ':telefono'        => $data['telefono'],
+            ':direccion'       => $data['direccion'],
+            ':password_hash'   => password_hash($data['password'], PASSWORD_DEFAULT),
             ':rol'             => $data['rol'],
         ]);
-
-        return (int) $this->db->lastInsertId();
     }
 
-    public function update(int $id, array $data): void
+    // Edición administrativa: incluye rol y estado, a diferencia de actualizarPerfil()
+    public function actualizar(int $id, array $data): bool
     {
         $stmt = $this->db->prepare(
-            'UPDATE usuarios
-             SET nombre_completo = :nombre_completo, identificacion = :identificacion, correo = :correo,
-                 telefono = :telefono, direccion = :direccion, rol = :rol
-             WHERE usuario_id = :id'
+            "UPDATE usuarios
+             SET nombre_completo = :nombre_completo,
+                 identificacion = :identificacion,
+                 correo = :correo,
+                 telefono = :telefono,
+                 direccion = :direccion,
+                 rol = :rol,
+                 estado = :estado
+             WHERE usuario_id = :id"
         );
-        $stmt->execute([
+
+        return $stmt->execute([
             ':nombre_completo' => $data['nombre_completo'],
             ':identificacion'  => $data['identificacion'],
             ':correo'          => $data['correo'],
-            ':telefono'        => $data['telefono'] !== '' ? $data['telefono'] : null,
-            ':direccion'       => $data['direccion'] !== '' ? $data['direccion'] : null,
+            ':telefono'        => $data['telefono'],
+            ':direccion'       => $data['direccion'],
             ':rol'             => $data['rol'],
+            ':estado'          => $data['estado'],
             ':id'              => $id,
         ]);
     }
 
-    private function siguienteCodigo(): string
+    public function contarActivos(): int
+    {
+        return (int) $this->db->query("SELECT COUNT(*) FROM usuarios WHERE estado = 'activo'")->fetchColumn();
+    }
+
+    // Usuarios con al menos un préstamo activo (sin devolución)
+    public function contarConPrestamosActivos(): int
+    {
+        $sql = "
+            SELECT COUNT(DISTINCT p.usuario_id)
+            FROM prestamos p
+            LEFT JOIN devoluciones d ON d.prestamo_id = p.prestamo_id
+            WHERE d.devolucion_id IS NULL
+        ";
+        return (int) $this->db->query($sql)->fetchColumn();
+    }
+
+    public function contarNuevosEsteMes(): int
+    {
+        $sql = "
+            SELECT COUNT(*)
+            FROM usuarios
+            WHERE MONTH(fecha_registro) = MONTH(CURDATE()) AND YEAR(fecha_registro) = YEAR(CURDATE())
+        ";
+        return (int) $this->db->query($sql)->fetchColumn();
+    }
+
+    // El código de socio es solo un identificador de exhibición; no participa en el login
+    private function generarCodigo(): string
     {
         $total = (int) $this->db->query('SELECT COUNT(*) FROM usuarios')->fetchColumn();
-        return 'USR-' . str_pad((string) ($total + 1), 3, '0', STR_PAD_LEFT);
+        return 'ID-' . str_pad((string) ($total + 1), 6, '0', STR_PAD_LEFT);
     }
-
-    private function iniciales(string $nombre): string
-    {
-        $partes = preg_split('/\s+/', trim($nombre));
-        $iniciales = mb_strtoupper(mb_substr($partes[0] ?? '', 0, 1));
-        if (isset($partes[1])) {
-            $iniciales .= mb_strtoupper(mb_substr($partes[1], 0, 1));
-        }
-        return $iniciales;
-    }
-
-    private function colorAvatar(int $id): string
-    {
-        $paleta = ['#4b3621', '#725a42', '#59422c', '#354a52', '#5b3a5c', '#3f5d4f'];
-        return $paleta[$id % count($paleta)];
-    }
-    
 }

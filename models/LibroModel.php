@@ -89,226 +89,132 @@ class LibroModel
         return $stmt->fetchAll();
     }
 
-    // Editoriales disponibles para el filtro y el formulario de registro
+    // Catálogo completo con ejemplares totales/disponibles, para la gestión administrativa
+    public function getAllAdmin(): array
+    {
+        $sql = "
+            SELECT
+                l.libro_id, l.codigo, l.titulo, l.isbn, l.anio_publicacion, l.portada_url,
+                a.nombre AS autor,
+                ed.nombre AS editorial,
+                g.nombre AS genero,
+                COUNT(e.ejemplar_id) AS ejemplares,
+                COUNT(CASE WHEN e.estado = 'disponible' THEN 1 END) AS disponibles
+            FROM libros l
+            INNER JOIN autores a ON l.autor_id = a.autor_id
+            LEFT JOIN editoriales ed ON l.editorial_id = ed.editorial_id
+            LEFT JOIN generos g ON l.genero_id = g.genero_id
+            LEFT JOIN ejemplares e ON e.libro_id = l.libro_id
+            GROUP BY l.libro_id, l.codigo, l.titulo, l.isbn, l.anio_publicacion, l.portada_url, a.nombre, ed.nombre, g.nombre
+            ORDER BY l.titulo
+        ";
+        return $this->db->query($sql)->fetchAll();
+    }
+
     public function getEditoriales(): array
     {
-        $stmt = $this->db->query('SELECT editorial_id, nombre FROM editoriales ORDER BY nombre');
-        return $stmt->fetchAll();
+        return $this->db->query('SELECT editorial_id, nombre FROM editoriales ORDER BY nombre')->fetchAll();
     }
 
-    // Indicadores generales del catálogo mostrados en las tarjetas superiores
-    public function obtenerStats(): array
+    public function getAutores(): array
     {
-        return [
-            'titulos'      => (int) $this->db->query('SELECT COUNT(*) FROM libros')->fetchColumn(),
-            'ejemplares'   => (int) $this->db->query('SELECT COUNT(*) FROM ejemplares')->fetchColumn(),
-            'disponibles'  => (int) $this->db->query("SELECT COUNT(*) FROM ejemplares WHERE estado = 'disponible'")->fetchColumn(),
-            'enReparacion' => (int) $this->db->query("SELECT COUNT(*) FROM ejemplares WHERE estado = 'en_reparacion'")->fetchColumn(),
-        ];
+        return $this->db->query('SELECT autor_id, nombre FROM autores ORDER BY nombre')->fetchAll();
     }
 
-    // Listado administrable con existencias, filtrable por texto, género, editorial y disponibilidad
-    public function getAdminListado(string $busqueda = '', ?int $generoId = null, ?int $editorialId = null, string $estadoDisponibilidad = ''): array
+    // Registra un libro nuevo junto con sus primeros ejemplares
+    public function create(array $data, int $ejemplaresIniciales): bool
     {
-        $sql = "
-            SELECT
-                l.libro_id,
-                l.codigo,
-                l.titulo,
-                l.isbn,
-                l.portada_url,
-                a.nombre AS autor,
-                g.nombre AS genero,
-                ed.nombre AS editorial,
-                COUNT(e.ejemplar_id) AS ejemplares,
-                COUNT(CASE WHEN e.estado = 'disponible' THEN 1 END) AS disponibles
-            FROM libros l
-            INNER JOIN autores a ON l.autor_id = a.autor_id
-            LEFT JOIN generos g ON l.genero_id = g.genero_id
-            LEFT JOIN editoriales ed ON l.editorial_id = ed.editorial_id
-            LEFT JOIN ejemplares e ON e.libro_id = l.libro_id
-            WHERE (l.titulo LIKE :busqueda1 OR a.nombre LIKE :busqueda2 OR l.isbn LIKE :busqueda3)
-        ";
+        $autorId = $this->buscarOCrear('autores', 'autor_id', $data['autor']);
+        $editorialId = $data['editorial'] !== '' ? $this->buscarOCrear('editoriales', 'editorial_id', $data['editorial']) : null;
+        $generoId = $data['genero'] !== '' ? $this->buscarOCrear('generos', 'genero_id', $data['genero']) : null;
 
-        $params = [
-            ':busqueda1' => '%' . $busqueda . '%',
-            ':busqueda2' => '%' . $busqueda . '%',
-            ':busqueda3' => '%' . $busqueda . '%',
-        ];
+        $stmt = $this->db->prepare(
+            "INSERT INTO libros (codigo, titulo, isbn, autor_id, editorial_id, genero_id, anio_publicacion, portada_url)
+             VALUES (:codigo, :titulo, :isbn, :autor_id, :editorial_id, :genero_id, :anio, :portada_url)"
+        );
 
-        if ($generoId) {
-            $sql .= ' AND l.genero_id = :genero_id';
-            $params[':genero_id'] = $generoId;
-        }
+        $creado = $stmt->execute([
+            ':codigo'      => $this->generarCodigo(),
+            ':titulo'      => $data['titulo'],
+            ':isbn'        => $data['isbn'],
+            ':autor_id'    => $autorId,
+            ':editorial_id' => $editorialId,
+            ':genero_id'   => $generoId,
+            ':anio'        => $data['anio'] ?: null,
+            ':portada_url' => $data['portada_url'] ?: null,
+        ]);
 
-        if ($editorialId) {
-            $sql .= ' AND l.editorial_id = :editorial_id';
-            $params[':editorial_id'] = $editorialId;
-        }
-
-        $sql .= ' GROUP BY l.libro_id, l.codigo, l.titulo, l.isbn, l.portada_url, a.nombre, g.nombre, ed.nombre ORDER BY l.titulo';
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-        $libros = $stmt->fetchAll();
-
-        foreach ($libros as &$libro) {
-            $libro['ejemplares'] = (int) $libro['ejemplares'];
-            $libro['disponibles'] = (int) $libro['disponibles'];
-            $libro['disponibilidad'] = $this->calcularDisponibilidad($libro['disponibles'], $libro['ejemplares']);
-        }
-        unset($libro);
-
-        if ($estadoDisponibilidad !== '') {
-            $libros = array_values(array_filter($libros, fn($libro) => $libro['disponibilidad'] === $estadoDisponibilidad));
-        }
-
-        return $libros;
-    }
-
-    // Ficha completa de un libro para los modales de ver detalle y editar
-    public function getById(int $id): array|false
-    {
-        $sql = "
-            SELECT
-                l.libro_id, l.codigo, l.titulo, l.isbn, l.autor_id, l.editorial_id, l.genero_id,
-                l.anio_publicacion, l.portada_url,
-                a.nombre AS autor, g.nombre AS genero, ed.nombre AS editorial,
-                COUNT(e.ejemplar_id) AS ejemplares,
-                COUNT(CASE WHEN e.estado = 'disponible' THEN 1 END) AS disponibles
-            FROM libros l
-            INNER JOIN autores a ON l.autor_id = a.autor_id
-            LEFT JOIN generos g ON l.genero_id = g.genero_id
-            LEFT JOIN editoriales ed ON l.editorial_id = ed.editorial_id
-            LEFT JOIN ejemplares e ON e.libro_id = l.libro_id
-            WHERE l.libro_id = :id
-            GROUP BY l.libro_id, l.codigo, l.titulo, l.isbn, l.autor_id, l.editorial_id, l.genero_id, l.anio_publicacion, l.portada_url, a.nombre, g.nombre, ed.nombre
-        ";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([':id' => $id]);
-        $libro = $stmt->fetch();
-
-        if (!$libro) {
+        if (!$creado) {
             return false;
         }
 
-        $libro['ejemplares'] = (int) $libro['ejemplares'];
-        $libro['disponibles'] = (int) $libro['disponibles'];
-        $libro['disponibilidad'] = $this->calcularDisponibilidad($libro['disponibles'], $libro['ejemplares']);
+        $libroId = (int) $this->db->lastInsertId();
+        $ubicacionId = (int) $this->db->query('SELECT ubicacion_id FROM ubicaciones ORDER BY ubicacion_id LIMIT 1')->fetchColumn();
 
-        return $libro;
-    }
-
-    // Registra un libro nuevo junto con sus primeras copias físicas
-    public function create(array $data, int $ejemplaresIniciales): void
-    {
-        $this->db->beginTransaction();
-        try {
-            $autorId = $this->obtenerOcrearAutor($data['autor']);
-            $codigo = $this->siguienteCodigo();
-
-            $stmt = $this->db->prepare(
-                'INSERT INTO libros (codigo, titulo, isbn, autor_id, editorial_id, genero_id, anio_publicacion, portada_url)
-                 VALUES (:codigo, :titulo, :isbn, :autor_id, :editorial_id, :genero_id, :anio, :portada)'
-            );
-            $stmt->execute([
-                ':codigo'       => $codigo,
-                ':titulo'       => $data['titulo'],
-                ':isbn'         => $data['isbn'],
-                ':autor_id'     => $autorId,
-                ':editorial_id' => $data['editorial_id'],
-                ':genero_id'    => $data['genero_id'],
-                ':anio'         => $data['anio_publicacion'],
-                ':portada'      => $data['portada_url'] !== '' ? $data['portada_url'] : null,
-            ]);
-
-            $libroId = (int) $this->db->lastInsertId();
-            $ubicacionId = $this->obtenerUbicacionPorDefecto();
-
-            $stmtEjemplar = $this->db->prepare(
-                "INSERT INTO ejemplares (libro_id, ubicacion_id, estado) VALUES (:libro_id, :ubicacion_id, 'disponible')"
-            );
-            for ($i = 0; $i < $ejemplaresIniciales; $i++) {
-                $stmtEjemplar->execute([':libro_id' => $libroId, ':ubicacion_id' => $ubicacionId]);
-            }
-
-            $this->db->commit();
-        } catch (PDOException $e) {
-            $this->db->rollBack();
-            throw $e;
+        $stmtEjemplar = $this->db->prepare(
+            "INSERT INTO ejemplares (libro_id, ubicacion_id, estado) VALUES (:libro_id, :ubicacion_id, 'disponible')"
+        );
+        for ($i = 0; $i < $ejemplaresIniciales; $i++) {
+            $stmtEjemplar->execute([':libro_id' => $libroId, ':ubicacion_id' => $ubicacionId]);
         }
+
+        return true;
     }
 
-    // Actualiza los datos bibliográficos. Los ejemplares se administran desde Inventario
-    public function update(int $id, array $data): void
+    // Edita los datos bibliográficos. Los ejemplares no se tocan aquí: se gestionan desde Inventario
+    public function update(int $id, array $data): bool
     {
-        $autorId = $this->obtenerOcrearAutor($data['autor']);
+        $autorId = $this->buscarOCrear('autores', 'autor_id', $data['autor']);
+        $editorialId = $data['editorial'] !== '' ? $this->buscarOCrear('editoriales', 'editorial_id', $data['editorial']) : null;
+        $generoId = $data['genero'] !== '' ? $this->buscarOCrear('generos', 'genero_id', $data['genero']) : null;
 
         $stmt = $this->db->prepare(
-            'UPDATE libros
+            "UPDATE libros
              SET titulo = :titulo, isbn = :isbn, autor_id = :autor_id, editorial_id = :editorial_id,
-                 genero_id = :genero_id, anio_publicacion = :anio, portada_url = :portada
-             WHERE libro_id = :id'
+                 genero_id = :genero_id, anio_publicacion = :anio, portada_url = :portada_url
+             WHERE libro_id = :id"
         );
-        $stmt->execute([
-            ':titulo'       => $data['titulo'],
-            ':isbn'         => $data['isbn'],
-            ':autor_id'     => $autorId,
-            ':editorial_id' => $data['editorial_id'],
-            ':genero_id'    => $data['genero_id'],
-            ':anio'         => $data['anio_publicacion'],
-            ':portada'      => $data['portada_url'] !== '' ? $data['portada_url'] : null,
-            ':id'           => $id,
+
+        return $stmt->execute([
+            ':titulo'      => $data['titulo'],
+            ':isbn'        => $data['isbn'],
+            ':autor_id'    => $autorId,
+            ':editorial_id' => $editorialId,
+            ':genero_id'   => $generoId,
+            ':anio'        => $data['anio'] ?: null,
+            ':portada_url' => $data['portada_url'] ?: null,
+            ':id'          => $id,
         ]);
     }
 
-    // Elimina el libro. La base de datos rechaza el borrado si aún tiene ejemplares registrados
-    public function delete(int $id): void
+    // Elimina el libro y sus ejemplares. Falla si algún ejemplar tiene préstamos asociados (FK)
+    public function delete(int $id): bool
     {
+        $this->db->prepare('DELETE FROM ejemplares WHERE libro_id = :id')->execute([':id' => $id]);
+
         $stmt = $this->db->prepare('DELETE FROM libros WHERE libro_id = :id');
-        $stmt->execute([':id' => $id]);
+        return $stmt->execute([':id' => $id]);
     }
 
-    // AGOTADO / PARCIAL / DISPONIBLE, la misma regla que usaba el catálogo de prueba
-    private function calcularDisponibilidad(int $disponibles, int $ejemplares): string
+    // Devuelve el id existente por nombre o crea el registro si no existe (autor/editorial/género)
+    private function buscarOCrear(string $tabla, string $columnaId, string $nombre): int
     {
-        if ($disponibles <= 0) return 'AGOTADO';
-        if ($disponibles < $ejemplares) return 'PARCIAL';
-        return 'DISPONIBLE';
+        $stmt = $this->db->prepare("SELECT $columnaId FROM $tabla WHERE nombre = :nombre LIMIT 1");
+        $stmt->execute([':nombre' => $nombre]);
+        $id = $stmt->fetchColumn();
+
+        if ($id) {
+            return (int) $id;
+        }
+
+        $stmt = $this->db->prepare("INSERT INTO $tabla (nombre) VALUES (:nombre)");
+        $stmt->execute([':nombre' => $nombre]);
+        return (int) $this->db->lastInsertId();
     }
 
-    private function siguienteCodigo(): string
+    private function generarCodigo(): string
     {
         $total = (int) $this->db->query('SELECT COUNT(*) FROM libros')->fetchColumn();
         return 'LIB-' . str_pad((string) ($total + 1), 3, '0', STR_PAD_LEFT);
-    }
-
-    // Reutiliza el autor si ya existe en el catálogo; si no, lo crea
-    private function obtenerOcrearAutor(string $nombre): int
-    {
-        $stmt = $this->db->prepare('SELECT autor_id FROM autores WHERE nombre = :nombre');
-        $stmt->execute([':nombre' => $nombre]);
-        $autorId = $stmt->fetchColumn();
-
-        if ($autorId) {
-            return (int) $autorId;
-        }
-
-        $stmt = $this->db->prepare('INSERT INTO autores (nombre) VALUES (:nombre)');
-        $stmt->execute([':nombre' => $nombre]);
-        return (int) $this->db->lastInsertId();
-    }
-
-    // Ubicación donde se colocan las copias nuevas hasta que Inventario les asigne un lugar definitivo
-    private function obtenerUbicacionPorDefecto(): int
-    {
-        $ubicacionId = $this->db->query('SELECT ubicacion_id FROM ubicaciones ORDER BY ubicacion_id LIMIT 1')->fetchColumn();
-        if ($ubicacionId) {
-            return (int) $ubicacionId;
-        }
-
-        $stmt = $this->db->prepare("INSERT INTO ubicaciones (pasillo, estante) VALUES ('A', '1')");
-        $stmt->execute();
-        return (int) $this->db->lastInsertId();
     }
 }

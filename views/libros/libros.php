@@ -6,6 +6,25 @@ $searchPlaceholder = 'Buscar libro...';
 $activeNav         = 'libros';
 $pageJs            = ['js/libros.js'];
 
+// Disponibilidad calculada a partir de ejemplares/disponibles de cada libro
+function disponibilidadLibro(array $libro): string
+{
+    if ($libro['disponibles'] <= 0) return 'AGOTADO';
+    if ($libro['disponibles'] < $libro['ejemplares']) return 'PARCIAL';
+    return 'DISPONIBLE';
+}
+
+function claseBadgeDisponibilidad(string $estado): string
+{
+    if ($estado === 'DISPONIBLE') return 'badge-exito';
+    if ($estado === 'PARCIAL') return 'badge-alerta';
+    return 'badge-error';
+}
+
+$generosNombres = array_column($generos, 'nombre');
+$editorialesNombres = array_column($editoriales, 'nombre');
+$autoresNombres = array_column($autores, 'nombre');
+
 require __DIR__ . '/../layout/header.php';
 ?>
 
@@ -15,28 +34,23 @@ require __DIR__ . '/../layout/header.php';
     <p>Administra el catálogo completo, existencias y disponibilidad de la biblioteca.</p>
   </div>
   <div class="pagina-acciones">
-    <button type="button" class="btn btn-primario" id="btn-nuevo-libro"><i class="bi bi-plus-lg"></i> Registrar Nuevo Libro</button>
+    <button class="btn btn-primario" id="btn-nuevo-libro"><i class="bi bi-plus-lg"></i> Registrar Nuevo Libro</button>
   </div>
 </div>
 
 <div class="fila-stats">
   <div class="stat-card">
     <p class="stat-label">Títulos Registrados</p>
-    <p class="stat-valor" id="stat-titulos"><?= (int) $stats['titulos'] ?></p>
+    <p class="stat-valor"><?= (int) $stats['titulos'] ?></p>
   </div>
   <div class="stat-card">
     <p class="stat-label">Total Ejemplares</p>
-    <p class="stat-valor" id="stat-ejemplares"><?= (int) $stats['ejemplares'] ?></p>
+    <p class="stat-valor"><?= (int) $stats['totalEjemplares'] ?></p>
   </div>
   <div class="stat-card">
     <p class="stat-label">Ejemplares Disponibles</p>
-    <p class="stat-valor" id="stat-disponibles"><?= (int) $stats['disponibles'] ?></p>
-    <span class="stat-trend" style="color:var(--exito)"><?= $stats['ejemplares'] > 0 ? round($stats['disponibles'] / $stats['ejemplares'] * 100) : 0 ?>% total</span>
-  </div>
-  <div class="stat-card<?= $stats['enReparacion'] > 0 ? ' stat-error' : '' ?>">
-    <p class="stat-label">En Reparación</p>
-    <p class="stat-valor" id="stat-reparacion"><?= (int) $stats['enReparacion'] ?></p>
-    <?php if ($stats['enReparacion'] > 0): ?><span class="stat-trend" style="color:var(--error)">Revisión pendiente</span><?php endif; ?>
+    <p class="stat-valor"><?= (int) $stats['disponibles'] ?></p>
+    <span class="stat-trend" style="color:var(--exito)"><?= $stats['totalEjemplares'] > 0 ? round(($stats['disponibles'] / $stats['totalEjemplares']) * 100) : 0 ?>% total</span>
   </div>
 </div>
 
@@ -45,14 +59,14 @@ require __DIR__ . '/../layout/header.php';
     <input type="search" id="buscar-libro" placeholder="Buscar por título, autor o ISBN...">
     <select id="filtro-genero">
       <option value="">Género</option>
-      <?php foreach ($generos as $genero): ?>
-        <option value="<?= (int) $genero['genero_id'] ?>"><?= htmlspecialchars($genero['nombre']) ?></option>
+      <?php foreach ($generosNombres as $nombre): ?>
+        <option value="<?= htmlspecialchars($nombre) ?>"><?= htmlspecialchars($nombre) ?></option>
       <?php endforeach; ?>
     </select>
     <select id="filtro-editorial">
       <option value="">Editorial</option>
-      <?php foreach ($editoriales as $editorial): ?>
-        <option value="<?= (int) $editorial['editorial_id'] ?>"><?= htmlspecialchars($editorial['nombre']) ?></option>
+      <?php foreach ($editorialesNombres as $nombre): ?>
+        <option value="<?= htmlspecialchars($nombre) ?>"><?= htmlspecialchars($nombre) ?></option>
       <?php endforeach; ?>
     </select>
     <select id="filtro-estado">
@@ -62,40 +76,56 @@ require __DIR__ . '/../layout/header.php';
       <option value="AGOTADO">AGOTADO</option>
     </select>
   </div>
-  <div class="tabla-scroll">
-    <table class="tabla">
-      <thead><tr><th>Portada</th><th>Libro</th><th>ISBN</th><th>Categoría</th><th>Disponibilidad</th><th>Acciones</th></tr></thead>
-      <tbody id="tabla-libros">
-        <?php if (empty($libros)): ?>
-          <tr><td colspan="6">No se encontraron libros con ese criterio.</td></tr>
-        <?php endif; ?>
-        <?php foreach ($libros as $libro): ?>
-          <?php $clase = $libro['disponibilidad'] === 'DISPONIBLE' ? 'badge-exito' : ($libro['disponibilidad'] === 'PARCIAL' ? 'badge-alerta' : 'badge-error'); ?>
-          <tr>
-            <td>
-              <?php if (!empty($libro['portada_url'])): ?>
-                <div class="portada-libro"><img src="img/<?= htmlspecialchars($libro['portada_url']) ?>" alt="Portada de <?= htmlspecialchars($libro['titulo']) ?>"></div>
-              <?php else: ?>
-                <div class="portada-libro"><?= htmlspecialchars(mb_strtoupper(mb_substr($libro['titulo'], 0, 2))) ?></div>
-              <?php endif; ?>
-            </td>
-            <td><div class="libro-info"><span class="libro-titulo"><?= htmlspecialchars($libro['titulo']) ?></span><span class="libro-autor"><?= htmlspecialchars($libro['autor']) ?></span></div></td>
-            <td><span class="isbn-texto"><?= htmlspecialchars($libro['isbn']) ?></span></td>
-            <td><?= htmlspecialchars($libro['genero'] ?? 'Sin categoría') ?></td>
-            <td><span class="badge <?= $clase ?>"><?= (int) $libro['disponibles'] ?> de <?= (int) $libro['ejemplares'] ?> disponibles</span></td>
-            <td class="acciones-celda">
-              <button class="btn-icono" title="Ver detalle" data-accion="ver" data-id="<?= (int) $libro['libro_id'] ?>"><i class="bi bi-eye"></i></button>
-              <button class="btn-icono" title="Editar" data-accion="editar" data-id="<?= (int) $libro['libro_id'] ?>"><i class="bi bi-pencil"></i></button>
-              <button class="btn-icono" title="Eliminar" data-accion="eliminar" data-id="<?= (int) $libro['libro_id'] ?>" data-titulo="<?= htmlspecialchars($libro['titulo']) ?>"><i class="bi bi-trash"></i></button>
-            </td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-  </div>
+  <div class="tabla-scroll"><table class="tabla">
+    <thead><tr><th>Portada</th><th>Libro</th><th>ISBN</th><th>Categoría</th><th>Disponibilidad</th><th>Acciones</th></tr></thead>
+    <tbody id="tabla-libros">
+      <?php foreach ($libros as $libro): $estadoCalc = disponibilidadLibro($libro); ?>
+        <tr data-texto="<?= htmlspecialchars(mb_strtolower($libro['titulo'] . ' ' . $libro['autor'] . ' ' . $libro['isbn'])) ?>"
+            data-genero="<?= htmlspecialchars($libro['genero'] ?? '') ?>"
+            data-editorial="<?= htmlspecialchars($libro['editorial'] ?? '') ?>"
+            data-disponibilidad="<?= $estadoCalc ?>">
+          <td>
+            <?php if ($libro['portada_url']): ?>
+              <div class="portada-libro"><img src="img/<?= htmlspecialchars($libro['portada_url']) ?>" alt="Portada de <?= htmlspecialchars($libro['titulo']) ?>"></div>
+            <?php else: ?>
+              <div class="portada-libro"><?= htmlspecialchars(mb_strtoupper(mb_substr($libro['titulo'], 0, 2))) ?></div>
+            <?php endif; ?>
+          </td>
+          <td><div class="libro-info"><span class="libro-titulo"><?= htmlspecialchars($libro['titulo']) ?></span><span class="libro-autor"><?= htmlspecialchars($libro['autor']) ?></span></div></td>
+          <td><span class="isbn-texto"><?= htmlspecialchars($libro['isbn']) ?></span></td>
+          <td><?= htmlspecialchars($libro['genero'] ?? '') ?></td>
+          <td><span class="badge <?= claseBadgeDisponibilidad($estadoCalc) ?>"><?= (int) $libro['disponibles'] ?> de <?= (int) $libro['ejemplares'] ?> disponibles</span></td>
+          <td class="acciones-celda">
+            <button class="btn-icono" title="Ver detalle" data-accion="ver"
+              data-titulo="<?= htmlspecialchars($libro['titulo'], ENT_QUOTES) ?>"
+              data-autor="<?= htmlspecialchars($libro['autor'], ENT_QUOTES) ?>"
+              data-isbn="<?= htmlspecialchars($libro['isbn'], ENT_QUOTES) ?>"
+              data-editorial="<?= htmlspecialchars($libro['editorial'] ?? '', ENT_QUOTES) ?>"
+              data-genero="<?= htmlspecialchars($libro['genero'] ?? '', ENT_QUOTES) ?>"
+              data-anio="<?= (int) $libro['anio_publicacion'] ?>"
+              data-portada="<?= htmlspecialchars($libro['portada_url'] ?? '', ENT_QUOTES) ?>"
+              data-disponibles="<?= (int) $libro['disponibles'] ?>"
+              data-ejemplares="<?= (int) $libro['ejemplares'] ?>"
+              data-estado="<?= $estadoCalc ?>"
+            ><i class="bi bi-eye"></i></button>
+            <button class="btn-icono" title="Editar" data-accion="editar"
+              data-id="<?= (int) $libro['libro_id'] ?>"
+              data-titulo="<?= htmlspecialchars($libro['titulo'], ENT_QUOTES) ?>"
+              data-autor="<?= htmlspecialchars($libro['autor'], ENT_QUOTES) ?>"
+              data-isbn="<?= htmlspecialchars($libro['isbn'], ENT_QUOTES) ?>"
+              data-editorial="<?= htmlspecialchars($libro['editorial'] ?? '', ENT_QUOTES) ?>"
+              data-genero="<?= htmlspecialchars($libro['genero'] ?? '', ENT_QUOTES) ?>"
+              data-anio="<?= (int) $libro['anio_publicacion'] ?>"
+              data-portada="<?= htmlspecialchars($libro['portada_url'] ?? '', ENT_QUOTES) ?>"
+            ><i class="bi bi-pencil"></i></button>
+            <button class="btn-icono" title="Eliminar" data-accion="eliminar" data-id="<?= (int) $libro['libro_id'] ?>" data-titulo="<?= htmlspecialchars($libro['titulo'], ENT_QUOTES) ?>"><i class="bi bi-trash"></i></button>
+          </td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table></div>
   <div class="paginacion-contenedor">
-    <span id="info-paginacion-libros"><?= count($libros) ?> libro<?= count($libros) === 1 ? '' : 's' ?> encontrados</span>
-    <div class="paginacion" id="paginacion-libros"></div>
+    <span id="info-paginacion-libros">Mostrando <?= count($libros) ?> de <?= count($libros) ?> libros</span>
   </div>
 </div>
 
@@ -106,65 +136,63 @@ require __DIR__ . '/../layout/header.php';
       <h2 id="modal-libro-titulo">Registrar Nuevo Libro</h2>
       <button class="modal-cerrar" data-cerrar-modal="modal-libro"><i class="bi bi-x-lg"></i></button>
     </div>
-    <div class="modal-body">
-      <div class="mensaje-error-servidor" id="mensaje-error-libro" style="display:none"></div>
-      <form id="form-libro" novalidate>
-        <input type="hidden" id="libro-id" value="">
+    <form id="form-libro" novalidate>
+      <div class="modal-body">
+        <div class="mensaje-error-servidor" id="mensaje-error-libro" style="display:none"></div>
         <div class="form-fila">
           <div class="form-grupo">
             <label for="libro-titulo">Título</label>
-            <input type="text" id="libro-titulo" placeholder="Título del libro">
+            <input type="text" id="libro-titulo" name="titulo" placeholder="Título del libro">
           </div>
           <div class="form-grupo">
             <label for="libro-autor">Autor</label>
-            <input type="text" id="libro-autor" placeholder="Nombre del autor">
+            <input type="text" id="libro-autor" name="autor" placeholder="Nombre del autor" list="lista-autores">
+            <datalist id="lista-autores">
+              <?php foreach ($autoresNombres as $nombre): ?><option value="<?= htmlspecialchars($nombre) ?>"><?php endforeach; ?>
+            </datalist>
           </div>
         </div>
         <div class="form-fila">
           <div class="form-grupo">
             <label for="libro-isbn">ISBN</label>
-            <input type="text" id="libro-isbn" placeholder="978-0000000000">
+            <input type="text" id="libro-isbn" name="isbn" placeholder="978-0000000000">
           </div>
           <div class="form-grupo">
             <label for="libro-editorial">Editorial</label>
-            <select id="libro-editorial">
-              <option value="">Seleccionar editorial</option>
-              <?php foreach ($editoriales as $editorial): ?>
-                <option value="<?= (int) $editorial['editorial_id'] ?>"><?= htmlspecialchars($editorial['nombre']) ?></option>
-              <?php endforeach; ?>
-            </select>
+            <input type="text" id="libro-editorial" name="editorial" placeholder="Nombre de la editorial" list="lista-editoriales">
+            <datalist id="lista-editoriales">
+              <?php foreach ($editorialesNombres as $nombre): ?><option value="<?= htmlspecialchars($nombre) ?>"><?php endforeach; ?>
+            </datalist>
           </div>
         </div>
         <div class="form-fila">
           <div class="form-grupo">
             <label for="libro-genero">Género</label>
-            <select id="libro-genero">
-              <option value="">Seleccionar género</option>
-              <?php foreach ($generos as $genero): ?>
-                <option value="<?= (int) $genero['genero_id'] ?>"><?= htmlspecialchars($genero['nombre']) ?></option>
-              <?php endforeach; ?>
-            </select>
+            <input type="text" id="libro-genero" name="genero" placeholder="Género" list="lista-generos">
+            <datalist id="lista-generos">
+              <?php foreach ($generosNombres as $nombre): ?><option value="<?= htmlspecialchars($nombre) ?>"><?php endforeach; ?>
+            </datalist>
           </div>
           <div class="form-grupo">
             <label for="libro-anio">Año de Publicación</label>
-            <input type="number" id="libro-anio" placeholder="2026">
+            <input type="number" id="libro-anio" name="anio" placeholder="2026">
           </div>
         </div>
         <div class="form-grupo">
-          <label for="libro-portada">URL de Portada</label>
-          <input type="url" id="libro-portada" placeholder="https://ejemplo.com/portada.jpg">
+          <label for="libro-portada">Nombre de archivo de Portada</label>
+          <input type="text" id="libro-portada" name="portada_url" placeholder="portada.jpg (dentro de img/)">
         </div>
         <div class="form-grupo" id="grupo-ejemplares-iniciales">
           <label for="libro-ejemplares">Ejemplares Iniciales</label>
-          <input type="number" id="libro-ejemplares" placeholder="1" min="1">
+          <input type="number" id="libro-ejemplares" name="ejemplares" placeholder="1" min="1">
           <p class="form-nota">Crea esta cantidad de copias físicas. Para agregar o dar de baja copias de un libro ya registrado, usa Inventario.</p>
         </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" data-cerrar-modal="modal-libro">Cancelar</button>
-      <button class="btn btn-primario" id="btn-guardar-libro">Guardar Libro</button>
-    </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" data-cerrar-modal="modal-libro">Cancelar</button>
+        <button type="submit" class="btn btn-primario">Guardar Libro</button>
+      </div>
+    </form>
   </div>
 </div>
 
