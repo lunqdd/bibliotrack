@@ -12,12 +12,12 @@ a library management system for public libraries — catalog, loans, inventory a
 
 ## stack
 
-php (custom mvc) · mysql · docker
+PHP (custom MVC) · MySQL · Docker
 
 ## running it
 
-`docker compose up` — app on http://localhost:8080, phpmyadmin on http://localhost:8082
+`docker compose up` — app on http://localhost:8080, phpMyAdmin on http://localhost:8082
 
 ## license
 
-mit — see [LICENSE.md](./LICENSE.md)
+MIT — see [LICENSE.md](./LICENSE.md)
