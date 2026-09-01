@@ -1,8 +1,8 @@
-# bibliotrack
+# BiblioTrack
 
-a library management system for public libraries — catalog, loans, inventory and reporting, with separate dashboards for admins and readers.
+A library management system for public libraries — catalog, loans, inventory and reporting, with separate dashboards for admins and readers.
 
-## what it does
+## What it does
 
 - book catalog and inventory management
 - loan (prestamos) tracking with pending-request handling
@@ -10,14 +10,14 @@ a library management system for public libraries — catalog, loans, inventory a
 - admin dashboard with reports and stats
 - user and role management
 
-## stack
+## Stack
 
 PHP (custom MVC) · MySQL · Docker
 
-## running it
+## Running it
 
 `docker compose up` — app on http://localhost:8080, phpMyAdmin on http://localhost:8082
 
-## license
+## License
 
 MIT — see [LICENSE.md](./LICENSE.md)
